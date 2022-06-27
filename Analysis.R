@@ -10,6 +10,7 @@
 
 # Load survey and dplyr packages
 #+ message = FALSE, warning=FALSE
+library(readr)
 library(dplyr)
 library(survey)
 #'
@@ -29,6 +30,7 @@ for (p in c("base", "survey","dplyr")) {
 # 99-00
 download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/DEMO.XPT", tf <- tempfile(), mode="wb")
 DEMO_99 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "SDDSRVYR",
                                        "RIAGENDR",
                                        "RIDAGEYR",
                                        "SDMVSTRA",
@@ -39,6 +41,7 @@ DEMO_99 <- foreign::read.xport(tf)[, c("SEQN",
 # 01-02
 download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/DEMO_B.XPT", tf <- tempfile(), mode="wb")
 DEMO_01 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "SDDSRVYR",
                                        "RIAGENDR",
                                        "RIDAGEYR",
                                        "SDMVSTRA",
@@ -49,6 +52,7 @@ DEMO_01 <- foreign::read.xport(tf)[, c("SEQN",
 # 03-04
 download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/DEMO_C.XPT", tf <- tempfile(), mode="wb")
 DEMO_03 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "SDDSRVYR",
                                        "RIAGENDR",
                                        "RIDAGEYR",
                                        "SDMVSTRA",
@@ -59,6 +63,7 @@ DEMO_03 <- foreign::read.xport(tf)[, c("SEQN",
 # 05-06
 download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/DEMO_D.XPT", tf <- tempfile(), mode="wb")
 DEMO_05 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "SDDSRVYR",
                                        "RIAGENDR",
                                        "RIDAGEYR",
                                        "SDMVSTRA",
@@ -217,23 +222,25 @@ df <- dplyr::left_join(DEMO_DIET_BODY, DEXA, by="SEQN")
 
 ###### salvando data.frame para explorar
 readr::write_csv2(x = df, file = "df.csv")
+df <- read.csv2(file = "df.csv")
 
 
 ###### PRECISA COLOCAR O PESO ABAIXO DOS MUTATE ##########
 
-df |>
+One <-
+  df |>
   # remove duplicates
   dplyr::distinct(SEQN, .keep_all = TRUE) |>
   # adjusting protein, CHO, energy, fat, calcium due to distinct assessments
   dplyr::mutate(DRXTPROT = tidyr::replace_na(DRXTPROT, 0),
-                DR1TPROT = tidyr::replace_na(DR1TPROT, 0)) |>
-  dplyr::mutate(DR1TCARB = tidyr::replace_na(DR1TCARB, 0),
-                DRXTCARB = tidyr::replace_na(DRXTCARB, 0)) |>
-  dplyr::mutate(DRXTKCAL = tidyr::replace_na(DRXTKCAL, 0),
-                DR1TKCAL = tidyr::replace_na(DR1TKCAL, 0)) |>
-  dplyr::mutate(DRXTTFAT = tidyr::replace_na(DRXTTFAT, 0),
-                DR1TTFAT = tidyr::replace_na(DR1TTFAT, 0)) |>
-  dplyr::mutate(DRXTCALC = tidyr::replace_na(DRXTCALC, 0),
+                DR1TPROT = tidyr::replace_na(DR1TPROT, 0),
+                DR1TCARB = tidyr::replace_na(DR1TCARB, 0),
+                DRXTCARB = tidyr::replace_na(DRXTCARB, 0),
+                DRXTKCAL = tidyr::replace_na(DRXTKCAL, 0),
+                DR1TKCAL = tidyr::replace_na(DR1TKCAL, 0),
+                DRXTTFAT = tidyr::replace_na(DRXTTFAT, 0),
+                DR1TTFAT = tidyr::replace_na(DR1TTFAT, 0),
+                DRXTCALC = tidyr::replace_na(DRXTCALC, 0),
                 DR1TCALC = tidyr::replace_na(DR1TCALC, 0)) |>
   # create apendicular lean mass
   dplyr::mutate(APLM = DXDLALE + DXDLLLE + DXDRALE + DXDRLLE,
@@ -259,73 +266,99 @@ df |>
                 ENERGY = DRXTKCAL + DR1TKCAL,
                 # create protein consumption status
                 PTN_STATUS = case_when(PTNKG < 0.8 ~ "BAIXO",
-                                       PTNKG >= 0.8 & PTNKG < 1.0 ~ "ADEQUADO",
-                                       PTNKG >= 1.0 ~ "ELEVADO"))
-
-
-
-One <- df |>
-  # remove duplicate
-  dplyr::distinct(SEQN, .keep_all = TRUE) |>
-  # Set 7=Refused and 9=Don't Know To Missing for variables DPQ010 thru DPQ090 ##
-  mutate_at(vars(DPQ010:DPQ090), ~ifelse(. >=7, NA, .)) %>%
-  mutate(. ,
-         # create indicator for overall summary
-         one = 1,
-         # Create depression score as sum of variables DPQ010 -- DPQ090
-         Depression.Score = rowSums(select(. , DPQ010:DPQ090)),
-         # Create depression indicator as binary 0/100 variable. (is missing if Depression.Score is missing)
-         Depression= ifelse(Depression.Score >=10, 100, 0),
-         # Create factor variables
-         Gender = factor(RIAGENDR, labels=c("Men", "Women")),
-         Age.Group = cut(RIDAGEYR, breaks=c(-Inf,19,39,59,Inf),labels=c("Under 20", "20-39","40-59","60 and over")),
-         # Generate 4-year MEC weight (Divide weight by 2 because we are appending 2 survey cycles)
-         # Note: using the MEC Exam Weights (WTMEC2YR), per the analytic notes on the
-         #       Mental Health - Depression Screener (DPQ_H) documentation
-         WTMEC4YR = WTMEC2YR/2 ,
-         # Define indicator for analysis population of interest: adults aged 20 and over with a valid depression score
-         inAnalysis= (RIDAGEYR >= 20 & !is.na(Depression.Score))
-  ) %>%
-  # drop DPQ variables
-  select(., -starts_with("DPQ"))
-
+                                       PTNKG >= 0.8 & PTNKG < 1.2 ~ "ADEQUADO",
+                                       PTNKG >= 1.2  & PTNKG < 1.6 ~ "MODERADO",
+                                       PTNKG >= 1.6 ~ "ELEVADO"),
+                # create low ALM
+                ALM_STATUS = case_when(RIAGENDR == 2 & APLMBMI < 512 ~ "BAIXO",
+                                       RIAGENDR == 2 & APLMBMI >= 521 ~ "ALTO",
+                                       RIAGENDR == 1 & APLMBMI < 789 ~ "BAIXO",
+                                       RIAGENDR == 1 & APLMBMI >= 789 ~ "ALTO"),
+                # create low alm plus obesity
+                SARC = case_when(ALM_STATUS == "BAIXO" & OBESITY == "OBESO" ~ "SARCOBESO",
+                                 ALM_STATUS == "ALTO" & OBESITY == "OBESO" ~ "OBESO",
+                                 ALM_STATUS == "BAIXO" & OBESITY == "NORMAL" ~ "SARC",
+                                 ALM_STATUS == "ALTO" & OBESITY == "NORMAL" ~ "NORMAL"),
+                # Peso de 8 anos
+                MEC8YR = case_when(SDDSRVYR <= 2 ~ 2/4 * WTMEC4YR,
+                                  (SDDSRVYR > 2 ~ 1/4 * WTMEC2YR)),
+                inAnalysis= (RIDAGEYR >= 65 & !is.na(DXXLSBMD))
+)
 
 #' ## Define survey design
 # Define survey design for overall dataset
-NHANES_all <- svydesign(data=One, id=~SDMVPSU, strata=~SDMVSTRA, weights=~WTMEC4YR, nest=TRUE)
+NHANES_all <- svydesign(data=One, id=~SDMVPSU, strata=~SDMVSTRA, weights=~MEC8YR, nest=TRUE)
 
 # Create a survey design object for the subset of interest: adults aged 20 and over with a valid depression score
 # Subsetting the original survey design object ensures we keep the design information about the number of clusters and strata
 NHANES <- subset(NHANES_all, inAnalysis)
 
-# Testes Saulo --------------------------------------------------------------------------------
-# olhando a base inteira - One <- autor deu esse nome
-
-# tamanho da amostra
-count(One)
-
-# ordenando para ver se tem duplicado
-One |>
-  arrange(SEQN) |> head()
-
-# tamanho da amostra sem duplicados
-count(One)
-
-# descritivo
-One |>
-  select(Depression.Score,
-         RIAGENDR,
-         SEQN) |>
-  summary()
-
 # extraindo a base do subset - o autor chamou de NHANES
 
 id <- as_tibble(NHANES$variables$SEQN)
-depresssion <- as_tibble(NHANES$variables$Depression.Score)
-sexo <- as_tibble(NHANES$variables$RIAGENDR)
+lombar <- as_tibble(NHANES$variables$DXXLSBMD)
+raca <- as_tibble(NHANES$variables$RIDRETH1)
+ptn <- as_tibble(NHANES$variables$PTNKG)
+ptn_status <- as_tibble(NHANES$variables$PTN_STATUS)
+osteo <- as_tibble(NHANES$variables$OSSO)
+ALM <- as_tibble(NHANES$variables$APLM)
+ALMBMI <- as_tibble(NHANES$variables$APLMBMI)
+BMI <- as_tibble(NHANES$variables$BMXBMI)
+obese <- as_tibble(NHANES$variables$OBESITY)
+APLMBMI <- as_tibble(NHANES$variables$ALM_STATUS)
+ALM_STATUS <- as_tibble(NHANES$variables$ALM_STATUS)
+SARC <- as_tibble(NHANES$variables$SARC)
 
-teste <- bind_cols(x = depresssion,y =  sexo, by = id)
+teste <-
+  bind_cols(id,
+            lombar,
+            ptn,
+            ptn_status,
+            osteo,
+            ALM,
+            ALMBMI,
+            BMI,
+            obese,
+            ALM_STATUS,
+            SARC)
 head(teste)
+
+teste <-
+  teste |>
+  rename(ic = value...1,
+         lombar = value...2,
+         ptn = value...3,
+         ptn_status = value...4,
+         osso = value...5,
+         ALM = value...6,
+         ALMBMI = value...7,
+         BMI = value...8,
+         obese = value...9,
+         ALM_STATUS = value...10,
+         sarc = value...11)
+head(teste, n = 10)
+
+teste |>
+  filter(!ptn < 0.1) |>
+  group_by(ptn_status) |>
+  summarise(mean(lombar))
+
+
+  group_by(ptn_status) |>
+  summarise(mean(lombar))
+
+
+teste |>
+  filter(!ptn < 0.01) |>
+  ggplot(aes(x = ptn_status,
+             y = lombar)) +
+  geom_col()
+
+cor.test(teste$BMI, teste$lombar)
+
+teste
+
+hist(log(teste$ptn), breaks = 300)
 
 # ordenando para ver os dados iguais
 teste |>
