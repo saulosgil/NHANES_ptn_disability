@@ -221,9 +221,12 @@ df <- dplyr::left_join(DEMO_DIET_BODY, DEXA, by="SEQN")
 # Created new variables -----------------------------------------------------------------------
 
 ###### salvando data.frame para explorar
-readr::write_csv2(x = df, file = "df.csv")
-df <- read.csv2(file = "df.csv")
 
+readr::write_csv2(x = df, file = "df.csv")
+
+# Lendo a base --------------------------------------------------------------------------------
+
+df <- read.csv2(file = "df.csv")
 
 ###### PRECISA COLOCAR O PESO ABAIXO DOS MUTATE ##########
 
@@ -264,6 +267,13 @@ One <-
                 CAL = DRXTCALC + DR1TCALC,
                 # create ENERGY consumption variable
                 ENERGY = DRXTKCAL + DR1TKCAL,
+                # create energy class for unlikely data
+                ENERGY_STATUS = case_when(RIAGENDR == 1 & ENERGY < 800 ~ "UNLIKELY",
+                                          RIAGENDR == 1 & ENERGY > 4000 ~ "UNLIKELY",
+                                          RIAGENDR == 1 & ENERGY >= 800 & ENERGY <=4000 ~ "LIKELY",
+                                          RIAGENDR == 2 & ENERGY < 500 ~ "UNLIKELY",
+                                          RIAGENDR == 2 & ENERGY > 3500 ~ "UNLIKELY",
+                                          RIAGENDR == 2 & ENERGY >= 500 & ENERGY <=3500 ~ "LIKELY"),
                 # create protein consumption status
                 PTN_STATUS = case_when(PTNKG < 0.8 ~ "BAIXO",
                                        PTNKG >= 0.8 & PTNKG < 1.2 ~ "ADEQUADO",
@@ -282,7 +292,7 @@ One <-
                 # Peso de 8 anos
                 MEC8YR = case_when(SDDSRVYR <= 2 ~ 2/4 * WTMEC4YR,
                                   (SDDSRVYR > 2 ~ 1/4 * WTMEC2YR)),
-                inAnalysis= (RIDAGEYR >= 65 & !is.na(DXXLSBMD))
+                inAnalysis= (RIDAGEYR >= 65 & !is.na(DXXLSBMD) & ENERGY_STATUS == "LIKELY")
 )
 
 #' ## Define survey design
@@ -296,6 +306,7 @@ NHANES <- subset(NHANES_all, inAnalysis)
 # extraindo a base do subset - o autor chamou de NHANES
 
 id <- as_tibble(NHANES$variables$SEQN)
+idade <- as_tibble(NHANES$variables$RIDAGEYR)
 lombar <- as_tibble(NHANES$variables$DXXLSBMD)
 raca <- as_tibble(NHANES$variables$RIDRETH1)
 ptn <- as_tibble(NHANES$variables$PTNKG)
@@ -308,9 +319,11 @@ obese <- as_tibble(NHANES$variables$OBESITY)
 APLMBMI <- as_tibble(NHANES$variables$ALM_STATUS)
 ALM_STATUS <- as_tibble(NHANES$variables$ALM_STATUS)
 SARC <- as_tibble(NHANES$variables$SARC)
+calcio <- as_tibble(NHANES$variables$CAL)
 
 teste <-
   bind_cols(id,
+            idade,
             lombar,
             ptn,
             ptn_status,
@@ -320,22 +333,25 @@ teste <-
             BMI,
             obese,
             ALM_STATUS,
-            SARC)
-head(teste)
+            SARC,
+            calcio)
+View(teste)
 
 teste <-
   teste |>
   rename(ic = value...1,
-         lombar = value...2,
-         ptn = value...3,
-         ptn_status = value...4,
-         osso = value...5,
-         ALM = value...6,
-         ALMBMI = value...7,
-         BMI = value...8,
-         obese = value...9,
-         ALM_STATUS = value...10,
-         sarc = value...11)
+         idade = value...2,
+         lombar = value...3,
+         ptn = value...4,
+         ptn_status = value...5,
+         osso = value...6,
+         ALM = value...7,
+         ALMBMI = value...8,
+         BMI = value...9,
+         obese = value...10,
+         ALM_STATUS = value...11,
+         sarc = value...12,
+         calcio = value...13)
 head(teste, n = 10)
 
 teste |>
@@ -344,21 +360,15 @@ teste |>
   summarise(mean(lombar))
 
 
-  group_by(ptn_status) |>
-  summarise(mean(lombar))
-
-
 teste |>
-  filter(!ptn < 0.01) |>
-  ggplot(aes(x = ptn_status,
-             y = lombar)) +
-  geom_col()
+  select(where(is.numeric)) |>
+  cor(use = "pairwise.complete.obs") |>
+  corrplot::corrplot(method = "number")
 
-cor.test(teste$BMI, teste$lombar)
+skimr::skim(teste)
 
-teste
 
-hist(log(teste$ptn), breaks = 300)
+hist(teste$lombar, breaks = 300)
 
 # ordenando para ver os dados iguais
 teste |>
