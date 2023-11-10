@@ -1,0 +1,147 @@
+---
+title: "Analise exploratória"
+author: "Saulo Gil"
+date: "30/06/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Análise exploratória
+## Pacotes utilizados
+```{r}
+# pacotes
+library(tidyverse)
+library(GGally)
+```
+
+## Lendo a base
+```{r}
+df_ajust <- read.csv2("df_ajust.csv")
+
+```
+
+## Selecionando as variaveis
+```{r}
+df <- 
+  df_ajust |>
+  select(id,
+         raca,
+         sexo,
+         idade,
+         peso,
+         bmi,
+         energy,
+         energy_pt_model,
+         cho,
+         fat,
+         ptn,
+         ptn_kg,
+         ptn_rda,
+         ptn_status,
+         functioning) |>
+  mutate(age_class = case_when(idade <= 80 ~ 0,
+                               idade > 80 ~ 1)) |> 
+  mutate(raca = as_factor(raca),
+         sexo = as_factor(sexo),
+         functioning = as_factor(functioning),
+         age_class = as_factor(age_class))
+```
+
+## Missing
+```{r out.width="100%"}
+# missing
+DataExplorer::plot_missing(df)
+```
+
+## Descritiva geral
+```{r}
+# General Descriptive and distribution analysis
+skimr::skim(df)
+```
+
+# Descritiva classificando pelo RDA
+## Descritiva apenas RDA abaixo
+```{r}
+df |> 
+  filter(ptn_rda == "A_BAIXO") |> 
+  skimr::skim()
+```
+
+## Descritiva apenas dos RDA ok
+```{r}
+df |> 
+  filter(ptn_rda == "B_ADEQUADO") |> 
+  skimr::skim()
+```
+
+# Descritiva classificando pelo classificação do Philips
+## Descritiva apenas dos baixo consumo de ptn
+```{r}
+df |> 
+  filter(ptn_status == "A_BAIXO") |> 
+  skimr::skim()
+```
+
+## Descritiva apenas dos adequado consumo de ptn
+```{r}
+df |> 
+  filter(ptn_status == "B_ADEQUADO") |> 
+  skimr::skim()
+```
+
+## Descritiva apenas dos moderado consumo de ptn
+```{r}
+df |> 
+  filter(ptn_status == "C_MODERADO") |> 
+  skimr::skim()
+```
+
+## Descritiva apenas dos elevado consumo de ptn
+```{r}
+df |> 
+  filter(ptn_status == "D_ELEVADO") |> 
+  skimr::skim()
+```
+
+
+# MODELAGEM
+## Crude logistic regression -  Consumo de PTN (RDA - >= 0.8 ptn = adequado)
+```{r fig.align='center'}
+rda_crude <- glm(as.factor(functioning) ~ ptn_rda, family = binomial, data = df)
+
+sjPlot::plot_model(rda_crude,show.values = TRUE)
+
+sjPlot::tab_model(rda_crude, show.intercept = FALSE)
+```
+
+## Adjusted logistic regression -  Consumo de PTN (RDA - >= 0.8 ptn = adequado)
+```{r fig.align='center'}
+rda_adjusted <- glm(as.factor(functioning) ~ ptn_rda + age_class + sexo + raca + energy_pt_model, family = binomial, data = df)
+
+sjPlot::plot_model(rda_adjusted,show.values = TRUE)
+
+sjPlot::tab_model(rda_adjusted, show.intercept = FALSE)
+
+```
+
+## Crude logistic regression -  Consumo de PTN (STU PHILLIPS)
+```{r fig.align='center'}
+stu_crude <- glm(as.factor(functioning) ~ ptn_status, family = binomial, data = df)
+
+sjPlot::plot_model(stu_crude,show.values = TRUE)
+
+sjPlot::tab_model(stu_crude, show.intercept = FALSE)
+```
+
+## Adjusted logistic regression -  Consumo de PTN (STU PHILLIPS)
+```{r fig.align='center'}
+stu_adjusted <- glm(as.factor(functioning) ~ ptn_status + age_class + sexo + raca + energy_pt_model, family = binomial, data = df)
+
+sjPlot::plot_model(stu_adjusted,show.values = TRUE)
+
+sjPlot::tab_model(stu_adjusted, show.intercept = FALSE)
+```
+
