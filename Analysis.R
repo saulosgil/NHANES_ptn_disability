@@ -351,10 +351,8 @@ readr::write_csv2(x = df, file = "df.csv")
 df <- read.csv2(file = "df.csv")
 
 # DataPrep ------------------------------------------------------------------------------------
-range(df$PFQ061H)
 One_1 <-
   df |>
-
   # remove duplicates
     dplyr::distinct(SEQN, .keep_all = TRUE) |>
 
