@@ -26,33 +26,10 @@ for (p in c("base", "survey","dplyr")) {
 #' # Data preparation
 # Download & Read SAS Transport Files
 # Demographic (DEMO)
-
 # Demographic ---------------------------------------------------------------------------------
-# 99-00
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/DEMO.XPT", tf <- tempfile(), mode="wb")
-DEMO_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "SDDSRVYR",
-                                       "RIAGENDR",
-                                       "RIDAGEYR",
-                                       "SDMVSTRA",
-                                       "SDMVPSU",
-                                       "RIDRETH1",
-                                       "WTMEC4YR")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/DEMO_B.XPT", tf <- tempfile(), mode="wb")
-DEMO_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "SDDSRVYR",
-                                       "RIAGENDR",
-                                       "RIDAGEYR",
-                                       "SDMVSTRA",
-                                       "SDMVPSU",
-                                       "RIDRETH1",
-                                       "WTMEC4YR")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/DEMO_C.XPT", tf <- tempfile(), mode="wb")
-DEMO_03 <- foreign::read.xport(tf)[, c("SEQN",
+# 11-12
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/DEMO_G.XPT", tf <- tempfile(), mode="wb")
+DEMO_11 <- foreign::read.xport(tf)[, c("SEQN",
                                        "SDDSRVYR",
                                        "RIAGENDR",
                                        "RIDAGEYR",
@@ -60,10 +37,29 @@ DEMO_03 <- foreign::read.xport(tf)[, c("SEQN",
                                        "SDMVPSU",
                                        "RIDRETH1",
                                        "WTMEC2YR")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/DEMO_D.XPT", tf <- tempfile(), mode="wb")
-DEMO_05 <- foreign::read.xport(tf)[, c("SEQN",
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/DEMO_H.XPT", tf <- tempfile(), mode="wb")
+DEMO_13 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "SDDSRVYR",
+                                       "RIAGENDR",
+                                       "RIDAGEYR",
+                                       "SDMVSTRA",
+                                       "SDMVPSU",
+                                       "RIDRETH1",
+                                       "WTMEC2YR")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DEMO_I.XPT", tf <- tempfile(), mode="wb")
+DEMO_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "SDDSRVYR",
+                                       "RIAGENDR",
+                                       "RIDAGEYR",
+                                       "SDMVSTRA",
+                                       "SDMVPSU",
+                                       "RIDRETH1",
+                                       "WTMEC2YR")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/DEMO_J.XPT", tf <- tempfile(), mode="wb")
+DEMO_17 <- foreign::read.xport(tf)[, c("SEQN",
                                        "SDDSRVYR",
                                        "RIAGENDR",
                                        "RIDAGEYR",
@@ -73,464 +69,278 @@ DEMO_05 <- foreign::read.xport(tf)[, c("SEQN",
                                        "WTMEC2YR")]
 
 # Dietary interview ---------------------------------------------------------------------------
-# 99-00
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/DRXTOT.XPT", tf <- tempfile(), mode="wb")
-DIET_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "DRXTKCAL",
-                                       "DRXTPROT",
-                                       "DRXTCARB",
-                                       "DRXTTFAT",
-                                       "DRXTCALC")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/DRXTOT_B.XPT", tf <- tempfile(), mode="wb")
-DIET_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "DRXTKCAL",
-                                       "DRXTPROT",
-                                       "DRXTCARB",
-                                       "DRXTTFAT",
-                                       "DRXTCALC")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/DR1TOT_C.XPT", tf <- tempfile(), mode="wb")
-DIET_03 <- foreign::read.xport(tf)[, c("SEQN",
+#11-12
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/DR1TOT_G.XPT", tf <- tempfile(), mode="wb")
+DIET_11 <- foreign::read.xport(tf)[, c("SEQN",
                                        "DR1TKCAL",
                                        "DR1TPROT",
                                        "DR1TCARB",
-                                       "DR1TTFAT",
-                                       "DR1TCALC")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/DR1TOT_D.XPT", tf <- tempfile(), mode="wb")
-DIET_05 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "DR1TTFAT")]
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/DR1TOT_H.XPT", tf <- tempfile(), mode="wb")
+DIET_13 <- foreign::read.xport(tf)[, c("SEQN",
                                        "DR1TKCAL",
                                        "DR1TPROT",
                                        "DR1TCARB",
-                                       "DR1TTFAT",
-                                       "DR1TCALC")]
-
+                                       "DR1TTFAT")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DR1TOT_I.XPT", tf <- tempfile(), mode="wb")
+DIET_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "DR1TKCAL",
+                                       "DR1TPROT",
+                                       "DR1TCARB",
+                                       "DR1TTFAT")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/DR1TOT_J.XPT", tf <- tempfile(), mode="wb")
+DIET_17 <- foreign::read.xport(tf)[, c("SEQN",
+                                       "DR1TKCAL",
+                                       "DR1TPROT",
+                                       "DR1TCARB",
+                                       "DR1TTFAT")]
 # Body measures -------------------------------------------------------------------------------
-# 99-00
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/BMX.XPT", tf <- tempfile(), mode="wb")
-BODY_99 <- foreign::read.xport(tf)[, c("SEQN",
+# 11-12
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/BMX_G.XPT", tf <- tempfile(), mode="wb")
+BODY_11 <- foreign::read.xport(tf)[, c("SEQN",
                                        "BMXWT",
                                        "BMXHT",
                                        "BMXBMI")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/BMX_B.XPT", tf <- tempfile(), mode="wb")
-BODY_01 <- foreign::read.xport(tf)[, c("SEQN",
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/BMX_H.XPT", tf <- tempfile(), mode="wb")
+BODY_13 <- foreign::read.xport(tf)[, c("SEQN",
                                        "BMXWT",
                                        "BMXHT",
                                        "BMXBMI")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/BMX_C.XPT", tf <- tempfile(), mode="wb")
-BODY_03 <- foreign::read.xport(tf)[, c("SEQN",
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/BMX_I.XPT", tf <- tempfile(), mode="wb")
+BODY_15 <- foreign::read.xport(tf)[, c("SEQN",
                                        "BMXWT",
                                        "BMXHT",
                                        "BMXBMI")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/BMX_D.XPT", tf <- tempfile(), mode="wb")
-BODY_05 <- foreign::read.xport(tf)[, c("SEQN",
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/BMX_J.XPT", tf <- tempfile(), mode="wb")
+BODY_17 <- foreign::read.xport(tf)[, c("SEQN",
                                        "BMXWT",
                                        "BMXHT",
                                        "BMXBMI")]
-
-# DEXA ----------------------------------------------------------------------------------------
-
-# Body measures -------------------------------------------------------------------------------
-# 99-00
-download.file("https://wwwn.cdc.gov/nchs/data/nhanes/dxa/dxx.xpt", tf <- tempfile(), mode="wb")
-DEXA_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "DXDLALE",
-                                       "DXDLLLE",
-                                       "DXDRALE",
-                                       "DXDRLLE",
-                                       "DXXLSBMD",
-                                       "DXDTOBMD",
-                                       "DXDTOPF")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/nchs/data/nhanes/dxa/dxx_b.xpt", tf <- tempfile(), mode="wb")
-DEXA_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "DXDLALE",
-                                       "DXDLLLE",
-                                       "DXDRALE",
-                                       "DXDRLLE",
-                                       "DXXLSBMD",
-                                       "DXDTOBMD",
-                                       "DXDTOPF")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/nchs/data/nhanes/dxa/dxx_c.xpt", tf <- tempfile(), mode="wb")
-DEXA_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "DXDLALE",
-                                       "DXDLLLE",
-                                       "DXDRALE",
-                                       "DXDRLLE",
-                                       "DXXLSBMD",
-                                       "DXDTOBMD",
-                                       "DXDTOPF")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/nchs/data/nhanes/dxa/dxx_d.xpt", tf <- tempfile(), mode="wb")
-DEXA_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "DXDLALE",
-                                       "DXDLLLE",
-                                       "DXDRALE",
-                                       "DXDRLLE",
-                                       "DXXLSBMD",
-                                       "DXDTOBMD",
-                                       "DXDTOPF")]
-
-# QUESTIONARY ---------------------------------------------------------------------------------
-# physical functioning ------------------------------------------------------------------------
-
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/PFQ.XPT", tf <- tempfile(), mode="wb")
-Q_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                    "PFQ060A",
-                                    "PFQ060B",
-                                    "PFQ060C",
-                                    "PFQ060D",
-                                    "PFQ060E",
-                                    "PFQ060F",
-                                    "PFQ060G",
-                                    "PFQ060H",
-                                    "PFQ060I",
-                                    "PFQ060J",
-                                    "PFQ060K",
-                                    "PFQ060L")]
-
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/PFQ_B.XPT", tf <- tempfile(), mode="wb")
-Q_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                    "PFQ060A",
-                                    "PFQ060B",
-                                    "PFQ060C",
-                                    "PFQ060D",
-                                    "PFQ060E",
-                                    "PFQ060F",
-                                    "PFQ060G",
-                                    "PFQ060H",
-                                    "PFQ060I",
-                                    "PFQ060J",
-                                    "PFQ060K",
-                                    "PFQ060L")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/PFQ_C.XPT", tf <- tempfile(), mode="wb")
-Q_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                    "PFQ061A",
-                                    "PFQ061B",
-                                    "PFQ061C",
-                                    "PFQ061D",
-                                    "PFQ061E",
-                                    "PFQ061F",
-                                    "PFQ061G",
-                                    "PFQ061H",
-                                    "PFQ061I",
-                                    "PFQ061J",
-                                    "PFQ061K",
-                                    "PFQ061L")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/PFQ_D.XPT", tf <- tempfile(), mode="wb")
-Q_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                    "PFQ061A",
-                                    "PFQ061B",
-                                    "PFQ061C",
-                                    "PFQ061D",
-                                    "PFQ061E",
-                                    "PFQ061F",
-                                    "PFQ061G",
-                                    "PFQ061H",
-                                    "PFQ061I",
-                                    "PFQ061J",
-                                    "PFQ061K",
-                                    "PFQ061L")]
-
-# LABORATORY ---------------------------------------------------------------------------------
-
-# CHOLESTEROL AND HDL -------------------------------------------------------------------------
-
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/LAB13.XPT", tf <- tempfile(), mode="wb")
-hdl_chol_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXTC",
-                                           "LBDHDL")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/L13_B.XPT", tf <- tempfile(), mode="wb")
-hdl_chol_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXTC",
-                                           "LBDHDL")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/L13_C.XPT", tf <- tempfile(), mode="wb")
-hdl_chol_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXTC",
-                                           "LBXHDD")]
-
-# 05-06 CHOLESTEROL
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/TCHOL_D.XPT", tf <- tempfile(), mode="wb")
-chol_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                       "LBXTC")]
-
-# 05-06 HDL
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/HDL_D.XPT", tf <- tempfile(), mode="wb")
-hdl_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                      "LBDHDD")]
-
-
-# LDL and triglycerides -----------------------------------------------------------------------
-
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/LAB13AM.XPT", tf <- tempfile(), mode="wb")
-ldl_tg_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                         "LBXTR",
-                                         "LBDLDL")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/L13AM_B.XPT", tf <- tempfile(), mode="wb")
-ldl_tg_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                         "LBXTR",
-                                         "LBDLDL")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/L13AM_C.XPT", tf <- tempfile(), mode="wb")
-ldl_tg_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                         "LBXTR",
-                                         "LBDLDL")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/TRIGLY_D.XPT", tf <- tempfile(), mode="wb")
-ldl_tg_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                         "LBXTR",
-                                         "LBDLDL")]
-
-# C-REACTIVE PROTEIN --------------------------------------------------------------------------
-
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/LAB11.XPT", tf <- tempfile(), mode="wb")
-rcp_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                      "LBXCRP")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/L11_B.XPT", tf <- tempfile(), mode="wb")
-rcp_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                      "LBXCRP")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/L11_C.XPT", tf <- tempfile(), mode="wb")
-rcp_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                      "LBXCRP")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/CRP_D.XPT", tf <- tempfile(), mode="wb")
-rcp_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                      "LBXCRP")]
-
-# GLICATED HEMOGLOBIN -------------------------------------------------------------------------
-
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/LAB10.XPT", tf <- tempfile(), mode="wb")
-gh_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                     "LBXGH")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/L10_B.XPT", tf <- tempfile(), mode="wb")
-gh_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                     "LBXGH")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/L10_C.XPT", tf <- tempfile(), mode="wb")
-gh_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                     "LBXGH")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/GHB_D.XPT", tf <- tempfile(), mode="wb")
-gh_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                     "LBXGH")]
-
-# Glucose and insulin -------------------------------------------------------------------------
-
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/1999-2000/LAB10AM.XPT", tf <- tempfile(), mode="wb")
-glic_ins_99 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXIN",
-                                           "LBXGLU")]
-
-# 01-02
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2001-2002/L10AM_B.XPT", tf <- tempfile(), mode="wb")
-glic_ins_01 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXIN",
-                                           "LBXGLU")]
-
-# 03-04
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2003-2004/L10AM_C.XPT", tf <- tempfile(), mode="wb")
-glic_ins_03 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXIN",
-                                           "LBXGLU")]
-
-# 05-06
-download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/GLU_D.XPT", tf <- tempfile(), mode="wb")
-glic_ins_05 <- foreign::read.xport(tf)[, c("SEQN",
-                                           "LBXIN",
-                                           "LBXGLU")]
-
-
-# Append Files
-DEMO <- dplyr::bind_rows(DEMO_99,
-                         DEMO_01,
-                         DEMO_03,
-                         DEMO_05)
-
-DEMO |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-
-DIET <-  dplyr::bind_rows(DIET_99,
-                          DIET_01,
-                          DIET_03,
-                          DIET_05)
-
-DIET |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-BODY <-  dplyr::bind_rows(BODY_99,
-                          BODY_01,
-                          BODY_03,
-                          BODY_05)
-
-BODY |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-DEXA <-  dplyr::bind_rows(DEXA_99,
-                          DEXA_01,
-                          DEXA_03,
-                          DEXA_05)
-
-DEXA_WITHOUT_DUPLICATE <- DEXA |>
-  dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "YES" NEED TREATMENT!
-
-QUEST <- dplyr::bind_rows(Q_99,
-                          Q_01,
-                          Q_03,
-                          Q_05)
-
-QUEST |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-
-RCP <- dplyr::bind_rows(rcp_99,
-                        rcp_01,
-                        rcp_03,
-                        rcp_05)
-
-RCP |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-HEMO <- dplyr::bind_rows(gh_99,
-                         gh_01,
-                         gh_03,
-                         gh_05)
-
-HEMO |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-GlU_INS <- dplyr::bind_rows(glic_ins_99,
-                           glic_ins_01,
-                           glic_ins_03,
-                           glic_ins_05)
-
-GlU_INS |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-
-LDL_TG <- dplyr::bind_rows(ldl_tg_99,
-                           ldl_tg_01,
-                           ldl_tg_03,
-                           ldl_tg_05)
-
-LDL_TG |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-# HDL and TC from 99 to 03
-HDL_CHOL <- dplyr::bind_rows(hdl_chol_99,
-                             hdl_chol_01,
-                             hdl_chol_03)
-
-# Appeding TC due to different links for data
-TC_99_03 <- HDL_CHOL |> select(SEQN, LBXTC)
-
-TC <- dplyr::bind_rows(TC_99_03, chol_05)
-
-TC |> dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "none"
-
-# Appeding HDL due to different links for data
-HDL_99_01 <- HDL_CHOL |> select(SEQN, LBDHDL)
-
-HDL_03 <- HDL_CHOL |>
-  select(SEQN, LBXHDD) |>
-  rename(LBDHDL = LBXHDD)
-
-HDL_05 <- hdl_05 |> rename(LBDHDL = LBDHDD)
-
-HDL <- dplyr::bind_rows(HDL_99_01,
-                        HDL_03,
-                        HDL_05)
-
-HDL_ajustado <- HDL |>
-  dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "YES" NEED TREATMENT!
-
-
+# Disability ----------------------------------------------------------------------------------
+#11-12
+  download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/PFQ_G.XPT", tf <- tempfile(), mode="wb")
+PFQ_11 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "PFQ061H",
+                                      "PFQ061I",
+                                      "PFQ061K",
+                                      "PFQ061L")]
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/PFQ_H.XPT", tf <- tempfile(), mode="wb")
+PFQ_13 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "PFQ061H",
+                                      "PFQ061I",
+                                      "PFQ061K",
+                                      "PFQ061L")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/PFQ_I.XPT", tf <- tempfile(), mode="wb")
+PFQ_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "PFQ061H",
+                                      "PFQ061I",
+                                      "PFQ061K",
+                                      "PFQ061L")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/PFQ_J.XPT", tf <- tempfile(), mode="wb")
+PFQ_17 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "PFQ061H",
+                                      "PFQ061I",
+                                      "PFQ061K",
+                                      "PFQ061L")]
+
+# Diabetes ------------------------------------------------------------------------------------
+#11-12
+  download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/DIQ_G.XPT", tf <- tempfile(), mode="wb")
+DM_11 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "DIQ010")]
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/DIQ_H.XPT", tf <- tempfile(), mode="wb")
+DM_13 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "DIQ010")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DIQ_I.XPT", tf <- tempfile(), mode="wb")
+DM_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "DIQ010")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/DIQ_J.XPT", tf <- tempfile(), mode="wb")
+DM_17 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "DIQ010")]
+
+# HAS -----------------------------------------------------------------------------------------
+#11-12
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/BPQ_G.XPT", tf <- tempfile(), mode="wb")
+HAS_11 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "BPQ020")]
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/BPQ_H.XPT", tf <- tempfile(), mode="wb")
+HAS_13 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "BPQ020")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/BPQ_I.XPT", tf <- tempfile(), mode="wb")
+HAS_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "BPQ020")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/BPQ_J.XPT", tf <- tempfile(), mode="wb")
+HAS_17 <- foreign::read.xport(tf)[, c("SEQN",
+                                      "BPQ020")]
+# heart conditions ----------------------------------------------------------------------------
+#11-12
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/MCQ_G.XPT", tf <- tempfile(), mode="wb")
+HEARTH_11 <- foreign::read.xport(tf)[, c("SEQN",
+                                         "MCQ160B",
+                                         "MCQ160E")]
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/MCQ_H.XPT", tf <- tempfile(), mode="wb")
+HEARTH_13 <- foreign::read.xport(tf)[, c("SEQN",
+                                         "MCQ160B",
+                                         "MCQ160E")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/MCQ_I.XPT", tf <- tempfile(), mode="wb")
+HEARTH_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                         "MCQ160B",
+                                         "MCQ160E")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/MCQ_J.XPT", tf <- tempfile(), mode="wb")
+HEARTH_17 <- foreign::read.xport(tf)[, c("SEQN",
+                                         "MCQ160B",
+                                         "MCQ160E")]
+
+# Physical activity ---------------------------------------------------------------------------
+#11-12
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/PAQ_G.XPT", tf <- tempfile(), mode="wb")
+PA_11 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "PAQ610",
+                                     "PAD615",
+                                     "PAQ620",
+                                     "PAQ625",
+                                     "PAD630",
+                                     "PAQ640",
+                                     "PAD645",
+                                     "PAQ655",
+                                     "PAD660",
+                                     "PAQ670",
+                                     "PAD675")]
+#13-14
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/PAQ_H.XPT", tf <- tempfile(), mode="wb")
+PA_13 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "PAQ610",
+                                     "PAD615",
+                                     "PAQ620",
+                                     "PAQ625",
+                                     "PAD630",
+                                     "PAQ640",
+                                     "PAD645",
+                                     "PAQ655",
+                                     "PAD660",
+                                     "PAQ670",
+                                     "PAD675")]
+#15-16
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/PAQ_I.XPT", tf <- tempfile(), mode="wb")
+PA_15 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "PAQ610",
+                                     "PAD615",
+                                     "PAQ620",
+                                     "PAQ625",
+                                     "PAD630",
+                                     "PAQ640",
+                                     "PAD645",
+                                     "PAQ655",
+                                     "PAD660",
+                                     "PAQ670",
+                                     "PAD675")]
+#17-18
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/PAQ_J.XPT", tf <- tempfile(), mode="wb")
+PA_17 <- foreign::read.xport(tf)[, c("SEQN",
+                                     "PAQ610",
+                                     "PAD615",
+                                     "PAQ620",
+                                     "PAQ625",
+                                     "PAD630",
+                                     "PAQ640",
+                                     "PAD645",
+                                     "PAQ655",
+                                     "PAD660",
+                                     "PAQ670",
+                                     "PAD675")]
+
+# Append files --------------------------------------------------------------------------------
+DEMO <- dplyr::bind_rows(DEMO_11,
+                         DEMO_13,
+                         DEMO_15,
+                         DEMO_17)
+
+
+
+DIET <-  dplyr::bind_rows(DIET_11,
+                          DIET_13,
+                          DIET_15,
+                          DIET_17)
+
+BODY <-  dplyr::bind_rows(BODY_11,
+                          BODY_13,
+                          BODY_15,
+                          BODY_17)
+
+PFQ <-  dplyr::bind_rows(PFQ_11,
+                         PFQ_13,
+                         PFQ_15,
+                         PFQ_17)
+
+DM <-  dplyr::bind_rows(DM_11,
+                        DM_13,
+                        DM_15,
+                        DM_17)
+
+HAS <-  dplyr::bind_rows(HAS_11,
+                         HAS_13,
+                         HAS_15,
+                         HAS_17)
+
+HEARTH <-  dplyr::bind_rows(HEARTH_11,
+                            HEARTH_13,
+                            HEARTH_15,
+                            HEARTH_17)
+
+PA <-  dplyr::bind_rows(PA_11,
+                        PA_13,
+                        PA_15,
+                        PA_17)
+
+# Merges --------------------------------------------------------------------------------------
 # Merge DEMO and DIET files
 
-DEMO_DIET <-
-  dplyr::left_join(DEMO, DIET, by="SEQN")
+DEMO_DIET <- dplyr::left_join(DEMO, DIET, by="SEQN")
 
 # Merge DEMO_DIET and BODY
 
-DEMO_DIET_BODY <-
-  dplyr::left_join(DEMO_DIET, BODY, by="SEQN")
+DEMO_DIET_BODY <- dplyr::left_join(DEMO_DIET, BODY, by="SEQN")
 
-# Merge DEMO_DIET_BODY and DEXA_ajust
+#Merge DEMO_DIET_BODY AND PFQ
 
-DEMO_DIET_BODY_DEXA <-
-  dplyr::left_join(DEMO_DIET_BODY, DEXA_WITHOUT_DUPLICATE, by="SEQN")
+DEMO_DIET_BODY_PFQ <- dplyr::left_join(DEMO_DIET_BODY, PFQ, by="SEQN")
 
-# Merge DEMO_DIET_BODY_DEXA and QUEST
+#Merge DEMO_DIET_BODY_PFQ AND DM
 
-DEMO_DIET_BODY_DEXA_QUEST <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA, QUEST, by="SEQN")
+DEMO_DIET_BODY_PFQ_DM <- dplyr::left_join(DEMO_DIET_BODY_PFQ, DM, by="SEQN")
 
-# Merge DEMO_DIET_BODY_DEXA_QUEST and TC
+#Merge DEMO_DIET_BODY_PFQ_DM and HAS
+DEMO_DIET_BODY_PFQ_DM_HAS <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM, HAS, by="SEQN")
 
-DEMO_DIET_BODY_DEXA_QUEST_TC <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA_QUEST, TC, by="SEQN")
+#Merge DEMO_DIET_BODY_PFQ_DM_HAS AND HEARTH
 
-# Merge DEMO_DIET_BODY_DEXA_QUEST_TC and HDL
+DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM_HAS, HEARTH, by="SEQN")
 
-DEMO_DIET_BODY_DEXA_QUEST_TC_HDL <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA_QUEST_TC, HDL, by="SEQN")
+#Merge DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH AND PA
 
-# Merge DEMO_DIET_BODY_DEXA_QUEST_HDL_TC and RCP
-
-DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA_QUEST_TC_HDL, RCP, by="SEQN")
-
-# Merge DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP and HEMO
-
-DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP, HEMO, by="SEQN")
-
-# Merge DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO and GLUC_INS
-
-DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO_GLU_INS <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO, GlU_INS, by="SEQN")
-
-# Merge DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO_GLUC_INS and LDL_TG
-
-DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO_GLU_INS_LDL_TG <-
-  dplyr::left_join(DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO_GLU_INS, LDL_TG, by="SEQN")
-
-df_bruto <- DEMO_DIET_BODY_DEXA_QUEST_TC_HDL_RCP_HEMO_GLU_INS_LDL_TG
-
-df <- df_bruto |>
-  dplyr::distinct(SEQN, .keep_all = TRUE) # testing duplicade rows - "YES" NEED TREATMENT!
-
+DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH_PA <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH, PA, by="SEQN")
 
 # Created new variables -----------------------------------------------------------------------
+
+df <- DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH_PA
 
 ###### salvando data.frame para explorar
 
@@ -541,66 +351,42 @@ readr::write_csv2(x = df, file = "df.csv")
 df <- read.csv2(file = "df.csv")
 
 # DataPrep ------------------------------------------------------------------------------------
-
+range(df$PFQ061H)
 One_1 <-
   df |>
-  # input 0 in NA due to different variable names
-  dplyr::mutate(DRXTPROT = tidyr::replace_na(DRXTPROT, 0),
-                DR1TPROT = tidyr::replace_na(DR1TPROT, 0),
-                DR1TCARB = tidyr::replace_na(DR1TCARB, 0),
-                DRXTCARB = tidyr::replace_na(DRXTCARB, 0),
-                DRXTKCAL = tidyr::replace_na(DRXTKCAL, 0),
-                DR1TKCAL = tidyr::replace_na(DR1TKCAL, 0),
-                DRXTTFAT = tidyr::replace_na(DRXTTFAT, 0),
-                DR1TTFAT = tidyr::replace_na(DR1TTFAT, 0),
-                DRXTCALC = tidyr::replace_na(DRXTCALC, 0),
-                DR1TCALC = tidyr::replace_na(DR1TCALC, 0),
-                PFQ060A = tidyr::replace_na(PFQ060A, 0),
-                PFQ061A = tidyr::replace_na(PFQ061A, 0),
-                PFQ060B = tidyr::replace_na(PFQ060B, 0),
-                PFQ061B = tidyr::replace_na(PFQ061B, 0),
-                PFQ060C = tidyr::replace_na(PFQ060C, 0),
-                PFQ061C = tidyr::replace_na(PFQ061C, 0),
-                PFQ060D = tidyr::replace_na(PFQ060D, 0),
-                PFQ061D = tidyr::replace_na(PFQ061D, 0),
-                PFQ060E = tidyr::replace_na(PFQ060E, 0),
-                PFQ061E = tidyr::replace_na(PFQ061E, 0),
-                PFQ060F = tidyr::replace_na(PFQ060F, 0),
-                PFQ061F = tidyr::replace_na(PFQ061F, 0),
-                PFQ060G = tidyr::replace_na(PFQ060G, 0),
-                PFQ061G = tidyr::replace_na(PFQ061G, 0),
-                PFQ060H = tidyr::replace_na(PFQ060H, 0),
-                PFQ061H = tidyr::replace_na(PFQ061H, 0),
-                PFQ060I = tidyr::replace_na(PFQ060I, 0),
-                PFQ061I = tidyr::replace_na(PFQ061I, 0),
-                PFQ060J = tidyr::replace_na(PFQ060J, 0),
-                PFQ061J = tidyr::replace_na(PFQ061J, 0),
-                PFQ060K = tidyr::replace_na(PFQ060K, 0),
-                PFQ061K = tidyr::replace_na(PFQ061K, 0),
-                PFQ060L = tidyr::replace_na(PFQ060L, 0),
-                PFQ061L = tidyr::replace_na(PFQ061L, 0)
-)
 
-# adjusting physical function parameters
+  # remove duplicates
+    dplyr::distinct(SEQN, .keep_all = TRUE) |>
 
-One_2 <-
-  One_1 |>
-  dplyr::mutate(MONEY_FUNCTION = PFQ060A + PFQ061A) |>
-  dplyr::mutate(WALKING_MILE = PFQ060B + PFQ061B) |>
-  dplyr::mutate(WALKING_STEPS = PFQ060C + PFQ061C) |>
-  dplyr::mutate(STOOPING = PFQ060D + PFQ061D) |>
-  dplyr::mutate(LIFTING = PFQ060E + PFQ061E) |>
-  dplyr::mutate(HOUSE_CHORE = PFQ060F + PFQ061F) |>
-  dplyr::mutate(PREP_MEALS = PFQ060G + PFQ061G) |>
-  dplyr::mutate(WALKING_ROOMS = PFQ060H + PFQ061H) |>
-  dplyr::mutate(STANDINGUP = PFQ060I + PFQ061I) |>
-  dplyr::mutate(BED_DIFFICULT = PFQ060J + PFQ061J) |>
-  dplyr::mutate(EATING = PFQ060K + PFQ061K) |>
-  dplyr::mutate(DRESSING = PFQ060L + PFQ061L)
-
+  # adjusting physical activity - where is NA to change to zero
+  dplyr::mutate(
+    PAQ610 = tidyr::replace_na(PAQ610, 0),
+    PAD615 = tidyr::replace_na(PAD615, 0),
+    PAQ620 = tidyr::replace_na(PAQ620, 0),
+    PAQ625 = tidyr::replace_na(PAQ625, 0),
+    PAD630 = tidyr::replace_na(PAD630, 0),
+    PAQ640 = tidyr::replace_na(PAQ640, 0),
+    PAD645 = tidyr::replace_na(PAD645, 0),
+    PAQ655 = tidyr::replace_na(PAQ655, 0),
+    PAD660 = tidyr::replace_na(PAD660, 0),
+    PAQ670 = tidyr::replace_na(PAQ670, 0),
+    PAD675 = tidyr::replace_na(PAD675, 0)
+  ) |>
+  # created physical activity outcomes
+  dplyr::mutate(
+    # PA work
+    PAW = PAQ610 * PAD615 + PAQ625 * PAD630,
+    # PA transport
+    PAT = PAQ640 * PAD645,
+    # PA leisure
+    PAL = PAQ655 * PAD660 + PAQ670 * PAD675
+  ) |>
+# adjusting physical functioning (disability) parameters
+  dplyr::mutate(WALKING_ROOMS = PFQ061H) |>
+  dplyr::mutate(STANDINGUP = PFQ061I) |>
+  dplyr::mutate(EATING = PFQ061K) |>
+  dplyr::mutate(DRESSING = PFQ061L) |>
 # To create the variable INCAPAZ - PRIMARY OUTCOME
-One_3 <-
-  One_2 |>
   mutate(WALKING_ROOMS_NOVO = case_when(WALKING_ROOMS == 0 ~ 1000,
                                         WALKING_ROOMS == 1 ~ 0,
                                         WALKING_ROOMS >=2 & WALKING_ROOMS <=4 ~ 1,
@@ -622,15 +408,7 @@ One_3 <-
                                     INCAPAZ > 1 & INCAPAZ <= 16 ~ 1, # disability
                                     INCAPAZ > 12 & INCAPAZ <=300 ~ 3))
 
-# Creating HOMA-IR
-
-# HOMA-IR function
-
-HOMA <- function(LBXGLU, LBXIN){
-  x <- LBXGLU / 18
-  y <- LBXIN / 22.5
-  x * y
-}
+# VERIFICAR O CALCULO DO DISABILITY - ESCORES MTO ELEVADOS
 
 One_4 <-
   One_3 |>
