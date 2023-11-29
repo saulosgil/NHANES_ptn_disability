@@ -23,6 +23,9 @@ for (p in c("base", "survey","dplyr")) {
   cat(p, ": ", as.character(packageVersion(p)), "\n")
 }
 
+# tirar notação cientifica
+options(scipen = 999)
+
 #' # Data preparation
 # Download & Read SAS Transport Files
 # Demographic (DEMO)
@@ -344,18 +347,19 @@ df <- DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH_PA
 
 ###### salvando data.frame para explorar
 
-readr::write_csv2(x = df, file = "df.csv")
+readr::write_rds(x = df, file = "test.rds")
 
 # Lendo a base --------------------------------------------------------------------------------
 
-df <- read.csv2(file = "df.csv")
+df <- read_rds(file = "test.rds")
+
+glimpse(df)
 
 # DataPrep ------------------------------------------------------------------------------------
-One_1 <-
+One <-
   df |>
   # remove duplicates
     dplyr::distinct(SEQN, .keep_all = TRUE) |>
-
   # adjusting physical activity - where is NA to change to zero
   dplyr::mutate(
     PAQ610 = tidyr::replace_na(PAQ610, 0),
@@ -372,12 +376,18 @@ One_1 <-
   ) |>
   # created physical activity outcomes
   dplyr::mutate(
+    # age_class
+    AGE = case_when(RIDAGEYR >= 65 & RIDAGEYR < 80 ~ "< 80 years",
+                    RIDAGEYR >= 80 ~ ">= 80 years"),
     # PA work
     PAW = PAQ610 * PAD615 + PAQ625 * PAD630,
     # PA transport
     PAT = PAQ640 * PAD645,
     # PA leisure
-    PAL = PAQ655 * PAD660 + PAQ670 * PAD675
+    PAL = PAQ655 * PAD660 + PAQ670 * PAD675,
+    PATOTAL = PAW + PAT + PAL,
+    PA_CLASS = case_when(PATOTAL >= 150 ~ "ATIVO",
+                         PATOTAL < 150 ~ "INATIVO")
   ) |>
 # adjusting physical functioning (disability) parameters
   dplyr::mutate(WALKING_ROOMS = PFQ061H) |>
@@ -385,98 +395,55 @@ One_1 <-
   dplyr::mutate(EATING = PFQ061K) |>
   dplyr::mutate(DRESSING = PFQ061L) |>
 # To create the variable INCAPAZ - PRIMARY OUTCOME
-  mutate(WALKING_ROOMS_NOVO = case_when(WALKING_ROOMS == 0 ~ 1000,
-                                        WALKING_ROOMS == 1 ~ 0,
-                                        WALKING_ROOMS >=2 & WALKING_ROOMS <=4 ~ 1,
-                                        WALKING_ROOMS >= 5 & WALKING_ROOMS < 10 ~ 100),
-         STANDINGUP_NOVO = case_when(STANDINGUP == 0 ~ 1000,
-                                     STANDINGUP == 1 ~ 0,
-                                     STANDINGUP >=2 & WALKING_ROOMS <=4 ~ 1,
-                                     STANDINGUP >= 5 & STANDINGUP < 10 ~ 100),
-         EATING_NOVO = case_when(EATING == 0 ~ 1000,
-                                 EATING == 1 ~ 0,
-                                 EATING >=2 & EATING <=4 ~ 1,
-                                 EATING >= 5 & EATING < 10 ~ 100),
-         DRESSING_NOVO = case_when(DRESSING == 0 ~ 1000,
-                                   DRESSING == 1 ~ 0,
-                                   DRESSING >=2 & WALKING_ROOMS <=4 ~ 1,
-                                   DRESSING >= 5 & DRESSING < 10 ~ 100),
+  mutate(WALKING_ROOMS_NOVO = case_when(WALKING_ROOMS == 1 ~ 0,
+                                        WALKING_ROOMS >=2 & WALKING_ROOMS <=4 ~ 1),
+         STANDINGUP_NOVO = case_when(STANDINGUP == 1 ~ 0,
+                                     STANDINGUP >=2 & WALKING_ROOMS <=4 ~ 1),
+         EATING_NOVO = case_when(EATING == 1 ~ 0,
+                                 EATING >=2 & EATING <=4 ~ 1),
+         DRESSING_NOVO = case_when(DRESSING == 1 ~ 0,
+                                   DRESSING >=2 & WALKING_ROOMS <=4 ~ 1),
          INCAPAZ = WALKING_ROOMS_NOVO + STANDINGUP_NOVO + EATING_NOVO + DRESSING_NOVO,
-         INCAPAZ_CLASSE = case_when(INCAPAZ <= 1 ~ 0, # no disability
-                                    INCAPAZ > 1 & INCAPAZ <= 16 ~ 1, # disability
-                                    INCAPAZ > 12 & INCAPAZ <=300 ~ 3))
-
-# VERIFICAR O CALCULO DO DISABILITY - ESCORES MTO ELEVADOS
-
-One_4 <-
-  One_3 |>
-  # calculate HOMA-IR
-  dplyr::mutate(HOMA_IR = HOMA(LBXGLU, LBXIN))
-
-# Creating apendicular lean mass, osteoporose and protein uptake variables
-
-One_5 <-
-  One_4 |>
-  # create apendicular lean mass
-  dplyr::mutate(APLM = DXDLALE + DXDLLLE + DXDRALE + DXDRLLE,
-                APLMBMI = APLM/BMXBMI,
-                # create obesity class
-                OBESITY = case_when(BMXBMI >= 30 ~ "OBESO",
-                                    BMXBMI < 30 ~ "NORMAL"),
-                # create osteoporose class
-                OSSO = case_when(DXXLSBMD > 0.915  ~ "NORMAL",
-                                 DXXLSBMD >= 0.762 & DXXLSBMD < 0.915 ~ "OSTEOPENIA",
-                                 DXXLSBMD <= 0.761 ~ "OSTEOPOROSE"),
-                # create protein consumption variable of distinct assessments
-                PTN = DR1TPROT + DRXTPROT,
-                # create relative protein consumption variable
-                PTNKG = PTN/BMXWT,
-                # create CHO consumption variable
-                CHO = DR1TCARB + DRXTCARB,
-                # create FAT consumption variable
-                FAT = DRXTTFAT + DR1TTFAT,
-                # create CALCIUM consuption variable
-                CAL = DRXTCALC + DR1TCALC,
-                # create ENERGY consumption variable
-                ENERGY = DRXTKCAL + DR1TKCAL,
-                # create RELATIVE ENERGY - ENERGY/KG
-                ENERGY_KG = ENERGY/BMXWT,
-                # create ENERGY_PT_MODEL
-                ENERGY_PT_MODEL = ENERGY - PTN * 4,
-                # create energy class for unlikely data
-                ENERGY_STATUS = case_when(RIAGENDR == 1 & ENERGY < 800 ~ "UNLIKELY",
-                                          RIAGENDR == 1 & ENERGY > 4000 ~ "UNLIKELY",
-                                          RIAGENDR == 1 & ENERGY >= 800 & ENERGY <=4000 ~ "LIKELY",
-                                          RIAGENDR == 2 & ENERGY < 500 ~ "UNLIKELY",
-                                          RIAGENDR == 2 & ENERGY > 3500 ~ "UNLIKELY",
-                                          RIAGENDR == 2 & ENERGY >= 500 & ENERGY <=3500 ~ "LIKELY"),
-                # create protein consumption status
-                PTN_STATUS = case_when(PTNKG < 0.8 ~ "A_BAIXO",
-                                       PTNKG >= 0.8 & PTNKG < 1.2 ~ "B_ADEQUADO",
-                                       PTNKG >= 1.2  & PTNKG < 1.6 ~ "C_MODERADO",
-                                       PTNKG >= 1.6 ~ "D_ELEVADO"),
-                # create pritein consumptoin status RDA
-                PTN_RDA = case_when(PTNKG < 0.8 ~ "A_BAIXO",
-                                    PTNKG >=0.8 ~ "B_ADEQUADO"),
-                # create low ALM
-                ALM_STATUS = case_when(RIAGENDR == 2 & APLMBMI < 512 ~ "BAIXO",
-                                       RIAGENDR == 2 & APLMBMI >= 521 ~ "ALTO",
-                                       RIAGENDR == 1 & APLMBMI < 789 ~ "BAIXO",
-                                       RIAGENDR == 1 & APLMBMI >= 789 ~ "ALTO"),
-                # create low alm plus obesity
-                SARC = case_when(ALM_STATUS == "BAIXO" & OBESITY == "OBESO" ~ "SARCOBESO",
-                                 ALM_STATUS == "ALTO" & OBESITY == "OBESO" ~ "OBESO",
-                                 ALM_STATUS == "BAIXO" & OBESITY == "NORMAL" ~ "SARC",
-                                 ALM_STATUS == "ALTO" & OBESITY == "NORMAL" ~ "NORMAL"),
-                # Peso de 8 anos
-                MEC8YR = case_when(SDDSRVYR <= 2 ~ 2/4 * WTMEC4YR,
-                                  (SDDSRVYR > 2 ~ 1/4 * WTMEC2YR)),
-                inAnalysis = (RIDAGEYR >= 65 & !is.na(INCAPAZ_CLASSE) & !is.na(PTN_STATUS) & INCAPAZ_CLASSE != 3 & ENERGY_STATUS == "LIKELY")
-)
-
-# Final database
-
-One <- One_5
+         INCAPAZ_CLASSE = case_when(INCAPAZ < 1 ~ 0, # no disability
+                                    INCAPAZ >= 1 & INCAPAZ <= 16 ~ 1),
+         OBESITY = case_when(BMXBMI >= 30 ~ "OBESO",
+                             BMXBMI < 30 ~ "NORMAL"),
+         ENERGY = DR1TKCAL,
+         PTN = DR1TPROT,
+         PTNKG = PTN/BMXWT,
+         CHO = DR1TCARB,
+         FAT = DR1TTFAT,
+         ENERGY_KG = ENERGY/BMXWT,
+         ENERGY_PT_MODEL = ENERGY - PTN * 4,
+         ENERGY_STATUS = case_when(RIAGENDR == 1 & ENERGY < 800 ~ "UNLIKELY",
+                                   RIAGENDR == 1 & ENERGY > 4000 ~ "UNLIKELY",
+                                   RIAGENDR == 1 & ENERGY >= 800 & ENERGY <=4000 ~ "LIKELY",
+                                   RIAGENDR == 2 & ENERGY < 500 ~ "UNLIKELY",
+                                   RIAGENDR == 2 & ENERGY > 3500 ~ "UNLIKELY",
+                                   RIAGENDR == 2 & ENERGY >= 500 & ENERGY <=3500 ~ "LIKELY"),
+         # create protein consumption status
+         PTN_STATUS = case_when(PTNKG < 0.8 ~ "A_BAIXO",
+                                PTNKG >= 0.8 & PTNKG < 1.2 ~ "B_ADEQUADO",
+                                PTNKG >= 1.2  & PTNKG < 1.6 ~ "C_MODERADO",
+                                PTNKG >= 1.6 ~ "D_ELEVADO"),
+         # create prOtein consumptoin status RDA
+         PTN_RDA = case_when(PTNKG < 0.8 ~ "A_BAIXO",
+                             PTNKG >=0.8 ~ "B_ADEQUADO"),
+         # Saulo/Hamilton protein consumption status
+         PTN_STATUS_ROSCHEL = case_when(PTNKG < 0.8 ~ "A_BAIXO",
+                                        PTNKG >= 0.8 & PTNKG < 1.2 ~ "B_ADEQUADO",
+                                        PTNKG >= 1.2 ~ "D_ELEVADO"),
+         # classes de ptn apenas no grupo LOW (abaixo da RDA)
+         PTN_MID_HIGH = case_when(PTNKG < 1.2 ~ "A_ate1.2",
+                                  PTNKG >= 1.2 & PTNKG < 1.6 ~ "B_1.2_a_1.6",
+                                  PTNKG >= 1.6 ~ "D_acima1.4"),
+         # create pritein consumptoin status RDA
+         PTN_RDA = case_when(PTNKG < 0.8 ~ "A_BAIXO",
+                             PTNKG >=0.8 ~ "B_ADEQUADO"),
+         # Peso de 8 anos
+         MEC8YR = WTMEC2YR * 1/4,
+         inAnalysis = (RIDAGEYR >= 65 & !is.na(INCAPAZ_CLASSE) & !is.na(OBESITY) & !is.na(PTN_RDA) & ENERGY_STATUS == "LIKELY")
+         )
 
 #' ## Define survey design
 # Define survey design for overall dataset
@@ -492,107 +459,83 @@ id <- as_tibble(NHANES$variables$SEQN)
 sexo <- as_tibble(NHANES$variables$RIAGENDR)
 raca <- as_tibble(NHANES$variables$RIDRETH1)
 idade <- as_tibble(NHANES$variables$RIDAGEYR)
+idade_class <- as_tibble(NHANES$variables$AGE)
 peso <- as_tibble(NHANES$variables$BMXWT)
-bmi <- as_tibble(NHANES$variables$BMXBMI)
-alm <- as_tibble(NHANES$variables$APLM)
-almbmi <- as_tibble(NHANES$variables$APLMBMI)
-alm_status <- as_tibble(NHANES$variables$ALM_STATUS)
-dmo_lombar <- as_tibble(NHANES$variables$DXXLSBMD)
 energy <- as_tibble(NHANES$variables$ENERGY)
 cho <- as_tibble(NHANES$variables$CHO)
 fat <- as_tibble(NHANES$variables$FAT)
 ptn <- as.tibble(NHANES$variables$PTN)
 ptn_kg <- as_tibble(NHANES$variables$PTNKG)
 ptn_status <- as_tibble(NHANES$variables$PTN_STATUS)
-calcio <- as_tibble(NHANES$variables$CAL)
-homa <- as.tibble(NHANES$variables$HOMA_IR)
-hemoglobina <- as.tibble(NHANES$variables$LBXGH)
-glicose <- as.tibble(NHANES$variables$LBXGLU)
-hdl <- as_tibble(NHANES$variables$LBDHDL)
-ldl <- as.tibble(NHANES$variables$LBDLDL)
-colesterol <- as.tibble(NHANES$variables$LBXTC)
-pcr <- as.tibble(NHANES$variables$LBXCRP)
 functioning <- as.tibble(NHANES$variables$INCAPAZ_CLASSE)
 obesity <- as_tibble(NHANES$variables$OBESITY)
-osteoporose <- as_tibble(NHANES$variables$OSSO)
-sarc <- as_tibble(NHANES$variables$SARC)
 ptn_rda <- as_tibble(NHANES$variables$PTN_RDA)
 energy_kg <- as_tibble(NHANES$variables$ENERGY_KG)
 energy_pt_model <- as_tibble(NHANES$variables$ENERGY_PT_MODEL)
+diabetes <- as_tibble(NHANES$variables$DIQ010)
+has <- as_tibble(NHANES$variables$BPQ020)
+heart_failure <- as_tibble(NHANES$variables$MCQ160B)
+heart_attack <- as_tibble(NHANES$variables$MCQ160E)
+patotal <- as_tibble(NHANES$variables$PATOTAL)
+pa_class <- as_tibble(NHANES$variables$PA_CLASS)
 
 # create database to analyse
 
 df_ajust <-
-  bind_cols(id,
-            sexo,
-            raca,
-            idade,
-            peso,
-            bmi,
-            alm,
-            almbmi,
-            alm_status,
-            dmo_lombar,
-            energy,
-            cho,
-            fat,
-            ptn,
-            ptn_status,
-            calcio,
-            homa,
-            hemoglobina,
-            glicose,
-            hdl,
-            ldl,
-            colesterol,
-            pcr,
-            functioning,
-            obesity,
-            osteoporose,
-            sarc,
-            ptn_rda,
-            energy_kg,
-            energy_pt_model,
-            ptn_kg) |>
-  rename("id" = value...1,
-         "sexo" = value...2,
-         "raca" = value...3,
-         "idade" = value...4,
-         "peso" = value...5,
-         "bmi" = value...6,
-         "alm" = value...7,
-         "almbmi" = value...8,
-         "alm_status" = value...9,
-         "dmo_lombar" = value...10,
-         "energy" = value...11,
-         "cho" = value...12,
-         "fat" = value...13,
-         "ptn" = value...14,
-         "ptn_status" = value...15,
-         "calcio" = value...16,
-         "homa" = value...17,
-         "hemoglobina" = value...18,
-         "glicose" = value...19,
-         "hdl" = value...20,
-         "ldl" = value...21,
-         "colesterol" = value...22,
-         "pcr" = value...23,
-         "functioning" = value...24,
-         "obesity" = value...25,
-         "osteoporose" = value...26,
-         "sarc" = value...27,
-         "ptn_rda" = value...28,
-         "energy_kg" = value...29,
-         "energy_pt_model" = value...30,
-         "ptn_kg" = value...31)
+  bind_cols(
+    id,
+    sexo,
+    raca,
+    idade,
+    idade_class,
+    peso,
+    energy,
+    cho,
+    fat,
+    ptn,
+    ptn_kg,
+    ptn_status,
+    ptn_rda,
+    functioning,
+    obesity,
+    energy_kg,
+    energy_pt_model,
+    diabetes,
+    has,
+    heart_failure,
+    heart_attack
+  ) |>
+  rename(
+    "id" = value...1,
+    "sexo" = value...2,
+    "raca" = value...3,
+    "idade" = value...4,
+    "idade_class" = value...5,
+    "peso" = value...6,
+    "energy" = value...7,
+    "cho" = value...8,
+    "fat" = value...9,
+    "ptn" = value...10,
+    "ptn_kg" = value...11,
+    "ptn_status" = value...12,
+    "ptn_rda" = value...13,
+    "functioning" = value...14,
+    "obesity" = value...15,
+    "energy_kg" = value...16,
+    "energy_pt_model" = value...17,
+    "diabetes" = value...18,
+    "has" = value...19,
+    "heart_failure" = value...20,
+    "heart_attack" = value...21
+  )
 
 # writing a df to explore
 
-readr::write_csv2(x = df_ajust, file = "df_ajust.csv")
+readr::write_rds(x = df_ajust, file = "df_ajust.rds")
 
 # reading new database
 
-df_ajust <- read.csv2("df_ajust.csv")
+df_ajust <- readr::read_rds("df_ajust.rds")
 
 # Exploratory analysis ------------------------------------------------------------------------
 
@@ -601,43 +544,3 @@ df_ajust <- read.csv2("df_ajust.csv")
 glimpse(df_ajust)
 
 skimr::skim(df_ajust)
-
-# TESTING MODELS
-
-## crude logistic regression -  Consumo de PTN (RDA - >= 0.8 ptn = adequado)
-rda_crude <- glm(as.factor(functioning) ~ ptn_rda, family = binomial, data = df_ajust)
-
-sjPlot::plot_model(rda_crude,show.values = TRUE)
-
-sjPlot::tab_model(rda_crude, show.intercept = FALSE)
-
-## Adjusted logistic regression -  Consumo de PTN (RDA - >= 0.8 ptn = adequado)
-rda_adjusted <- glm(as.factor(functioning) ~ ptn_rda + idade + sexo + raca + energy_pt_model, family = binomial, data = df_ajust)
-
-sjPlot::plot_model(rda_adjusted,show.values = TRUE)
-
-sjPlot::tab_model(rda_adjusted, show.intercept = FALSE)
-
-## crude logistic regression -  Consumo de PTN (STU PHILLIPS)
-stu_crude <- glm(as.factor(functioning) ~ ptn_status, family = binomial, data = df_ajust)
-
-sjPlot::plot_model(stu_crude,show.values = TRUE)
-
-sjPlot::tab_model(stu_crude, show.intercept = FALSE)
-
-## Adjusted logistic regression -  Consumo de PTN (STU PHILLIPS)
-stu_adjusted <- glm(as.factor(functioning) ~ ptn_status + idade + sexo + raca + energy_pt_model, family = binomial, data = df_ajust)
-
-sjPlot::plot_model(stu_adjusted,show.values = TRUE)
-
-sjPlot::tab_model(stu_adjusted, show.intercept = FALSE)
-
-
-
-
-
-
-
-
-
-
