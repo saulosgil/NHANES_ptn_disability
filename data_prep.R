@@ -337,7 +337,7 @@ DEMO_DIET_BODY_PFQ_DM_HAS <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM, HAS, by="SE
 
 DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM_HAS, HEARTH, by="SEQN")
 
-#Merge DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH AND PA
+# Merge DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH AND PA
 
 DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH_PA <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH, PA, by="SEQN")
 
@@ -346,13 +346,10 @@ DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH_PA <- dplyr::left_join(DEMO_DIET_BODY_PFQ_DM_HA
 df <- DEMO_DIET_BODY_PFQ_DM_HAS_HEARTH_PA
 
 ###### salvando data.frame para explorar
-
-readr::write_rds(x = df, file = "test.rds")
+readr::write_rds(x = df, file = "df.rds")
 
 # Lendo a base --------------------------------------------------------------------------------
-
-df <- read_rds(file = "test.rds")
-
+df <- read_rds(file = "df.rds")
 glimpse(df)
 
 # DataPrep ------------------------------------------------------------------------------------
@@ -434,15 +431,24 @@ One <-
                                         PTNKG >= 0.8 & PTNKG < 1.2 ~ "B_ADEQUADO",
                                         PTNKG >= 1.2 ~ "D_ELEVADO"),
          # classes de ptn apenas no grupo LOW (abaixo da RDA)
+         PTN_LOW_RDA = case_when(PTNKG < 0.3 ~ "A_ate0.3",
+                                 PTNKG >= 0.3 & PTNKG < 0.6 ~ "B_0.3_a_0.6",
+                                 PTNKG >= 0.6 ~ "D_acima0.6"),
+         # classes de ptn apenas no grupo LOW (abaixo da RDA)
          PTN_MID_HIGH = case_when(PTNKG < 1.2 ~ "A_ate1.2",
                                   PTNKG >= 1.2 & PTNKG < 1.6 ~ "B_1.2_a_1.6",
-                                  PTNKG >= 1.6 ~ "D_acima1.4"),
-         # create pritein consumptoin status RDA
-         PTN_RDA = case_when(PTNKG < 0.8 ~ "A_BAIXO",
-                             PTNKG >=0.8 ~ "B_ADEQUADO"),
+                                  PTNKG >= 1.6 ~ "D_acima1.6"),
          # Peso de 8 anos
          MEC8YR = WTMEC2YR * 1/4,
-         inAnalysis = (RIDAGEYR >= 65 & !is.na(INCAPAZ_CLASSE) & !is.na(OBESITY) & !is.na(PTN_RDA) & ENERGY_STATUS == "LIKELY")
+         inAnalysis = (RIDAGEYR >= 65 &
+                       !is.na(INCAPAZ_CLASSE) &
+                       !is.na(OBESITY) &
+                       !is.na(PTN_RDA) &
+                       ENERGY_STATUS == "LIKELY") &
+                       DIQ010 < 3 & # Diabetes (1 = yes; 2 = no)
+                       BPQ020 < 3 & # HAS (1 = yes; 2 = no)
+                       MCQ160B < 3 & # ICC (1 = yes; 2 = no)
+                       MCQ160E < 3 # heart attack (1 = yes; 2 = no)
          )
 
 #' ## Define survey design
@@ -453,94 +459,12 @@ NHANES_all <- svydesign(data=One, id=~SDMVPSU, strata=~SDMVSTRA, weights=~MEC8YR
 # Subsetting the original survey design object ensures we keep the design information about the number of clusters and strata
 NHANES <- subset(NHANES_all, inAnalysis)
 
-# creating database from subset - the author called of NHANES
-
-id <- as_tibble(NHANES$variables$SEQN)
-sexo <- as_tibble(NHANES$variables$RIAGENDR)
-raca <- as_tibble(NHANES$variables$RIDRETH1)
-idade <- as_tibble(NHANES$variables$RIDAGEYR)
-idade_class <- as_tibble(NHANES$variables$AGE)
-peso <- as_tibble(NHANES$variables$BMXWT)
-energy <- as_tibble(NHANES$variables$ENERGY)
-cho <- as_tibble(NHANES$variables$CHO)
-fat <- as_tibble(NHANES$variables$FAT)
-ptn <- as.tibble(NHANES$variables$PTN)
-ptn_kg <- as_tibble(NHANES$variables$PTNKG)
-ptn_status <- as_tibble(NHANES$variables$PTN_STATUS)
-functioning <- as.tibble(NHANES$variables$INCAPAZ_CLASSE)
-obesity <- as_tibble(NHANES$variables$OBESITY)
-ptn_rda <- as_tibble(NHANES$variables$PTN_RDA)
-energy_kg <- as_tibble(NHANES$variables$ENERGY_KG)
-energy_pt_model <- as_tibble(NHANES$variables$ENERGY_PT_MODEL)
-diabetes <- as_tibble(NHANES$variables$DIQ010)
-has <- as_tibble(NHANES$variables$BPQ020)
-heart_failure <- as_tibble(NHANES$variables$MCQ160B)
-heart_attack <- as_tibble(NHANES$variables$MCQ160E)
-patotal <- as_tibble(NHANES$variables$PATOTAL)
-pa_class <- as_tibble(NHANES$variables$PA_CLASS)
-
-# create database to analyse
-
-df_ajust <-
-  bind_cols(
-    id,
-    sexo,
-    raca,
-    idade,
-    idade_class,
-    peso,
-    energy,
-    cho,
-    fat,
-    ptn,
-    ptn_kg,
-    ptn_status,
-    ptn_rda,
-    functioning,
-    obesity,
-    energy_kg,
-    energy_pt_model,
-    diabetes,
-    has,
-    heart_failure,
-    heart_attack
-  ) |>
-  rename(
-    "id" = value...1,
-    "sexo" = value...2,
-    "raca" = value...3,
-    "idade" = value...4,
-    "idade_class" = value...5,
-    "peso" = value...6,
-    "energy" = value...7,
-    "cho" = value...8,
-    "fat" = value...9,
-    "ptn" = value...10,
-    "ptn_kg" = value...11,
-    "ptn_status" = value...12,
-    "ptn_rda" = value...13,
-    "functioning" = value...14,
-    "obesity" = value...15,
-    "energy_kg" = value...16,
-    "energy_pt_model" = value...17,
-    "diabetes" = value...18,
-    "has" = value...19,
-    "heart_failure" = value...20,
-    "heart_attack" = value...21
-  )
-
-# writing a df to explore
-
-readr::write_rds(x = df_ajust, file = "df_ajust.rds")
-
-# reading new database
-
-df_ajust <- readr::read_rds("df_ajust.rds")
+# to verify number of protein < 0.80
+nrow(NHANES$variables)
 
 # Exploratory analysis ------------------------------------------------------------------------
-
 # General Descriptive and distribution analysis
+glimpse(NHANES$variables)
+skimr::skim(NHANES$variables)
+DataExplorer::plot_missing(NHANES$variables)
 
-glimpse(df_ajust)
-
-skimr::skim(df_ajust)

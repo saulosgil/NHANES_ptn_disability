@@ -87,7 +87,7 @@ One <-
          # classes de ptn apenas no grupo LOW (abaixo da RDA)
          PTN_MID_HIGH = case_when(PTNKG < 1.2 ~ "A_ate1.2",
                                   PTNKG >= 1.2 & PTNKG < 1.6 ~ "B_1.2_a_1.6",
-                                  PTNKG >= 1.6 ~ "D_acima1.6"),
+                                  PTNKG >= 1.6 ~ "D_acima1.4"),
          # Peso de 8 anos
          MEC8YR = WTMEC2YR * 1/4,
          inAnalysis = (RIDAGEYR >= 65 &
@@ -98,8 +98,7 @@ One <-
            DIQ010 < 3 & # Diabetes (1 = yes; 2 = no)
            BPQ020 < 3 & # HAS (1 = yes; 2 = no)
            MCQ160B < 3 & # ICC (1 = yes; 2 = no)
-           MCQ160E < 3 & # heart attack (1 = yes; 2 = no)
-           PTN_RDA != "A_BAIXO"
+           MCQ160E < 3 # heart attack (1 = yes; 2 = no)
   )
 
 #' ## Define survey design
@@ -110,36 +109,63 @@ NHANES_all <- svydesign(data=One, id=~SDMVPSU, strata=~SDMVSTRA, weights=~MEC8YR
 # Subsetting the original survey design object ensures we keep the design information about the number of clusters and strata
 NHANES <- subset(NHANES_all, inAnalysis)
 
-# to verify number of protein < 0.80
-nrow(NHANES$variables)
-
-# Exploratory analysis ------------------------------------------------------------------------
-
-# General Descriptive and distribution analysis
-glimpse(NHANES$variables)
-skimr::skim_without_charts(NHANES$variables)
-DataExplorer::plot_missing(NHANES$variables)
-
 # TESTING MODELS
-# TO avoid scientific notation
+# To avoid scientific notation
 options(scipen=999)
 
-# Models to test " below RDA for protein group" ------------------------
-## crude logistic regression
-high_rda_crude_svy <- survey::svyglm(formula = as.factor(INCAPAZ_CLASSE) ~ as.factor(PTN_MID_HIGH), design = NHANES,
-                                family = binomial(link = "logit"))
+# Models to test "RDA vs Non-RDA" -------------------------------------------------------------
+
+## crude logistic regression -  Consumo de PTN (RDA - >= 0.8 ptn = adequado)
+# rda_crude <- glm(as.factor(functioning) ~ ptn_rda, family = binomial, data = df_ajust)
+rda_crude_svy <-
+  survey::svyglm(
+    formula = as.factor(INCAPAZ_CLASSE) ~ as.factor(PTN_RDA),
+    design = NHANES,
+    family = binomial(link = "logit")
+  )
 
 # Summary
-summary(high_rda_crude_svy)
-cbind(odds = exp(high_rda_crude_svy$coefficients),exp(confint(high_rda_crude_svy)))
-sjPlot::tab_model(high_rda_crude_svy)
+summary(rda_crude_svy)
+cbind(odds = exp(rda_crude_svy$coefficients), exp(confint(rda_crude_svy)))
+sjPlot::tab_model(rda_crude_svy)
 
-## Adjusted logistic regression
-high_rda_adjusted_svy <- survey::svyglm(formula = as.factor(INCAPAZ_CLASSE) ~ as.factor(PTN_MID_HIGH) + RIAGENDR + AGE + RIDRETH1 + PA_CLASS + ENERGY_PT_MODEL + DIQ010 + BPQ020 + MCQ160B + MCQ160E,
-                                   design = NHANES,
-                                   family = binomial(link = "logit"))
+## Adjusted logistic regression -  Consumo de PTN (RDA - >= 0.8 ptn = adequado)
+# rda_adjusted <- glm(as.factor(functioning) ~ ptn_rda + idade + sexo + as_factor(raca) + pad + energy_kg_model, family = binomial, data = df_ajust)
+rda_adjusted_svy <-
+  survey::svyglm(
+    formula = as.factor(INCAPAZ_CLASSE) ~ as.factor(PTN_RDA) + RIAGENDR + AGE + RIDRETH1 + PA_CLASS + ENERGY_PT_MODEL + DIQ010 + BPQ020 + MCQ160B + MCQ160E,
+    design = NHANES,
+    family = binomial(link = "logit")
+  )
 
 # Summary
-summary(high_rda_adjusted_svy)
-cbind(odds = exp(high_rda_adjusted_svy$coefficients),exp(confint(high_rda_adjusted_svy)))
-sjPlot::tab_model(high_rda_adjusted_svy)
+summary(rda_adjusted_svy)
+cbind(odds = exp(rda_adjusted_svy$coefficients), exp(confint(rda_adjusted_svy)))
+sjPlot::tab_model(rda_adjusted_svy)
+
+# Models to test "Low, adequate and high protein" (Roschel and Saulo)----------------- --------
+## crude logistic regression -  Consumo de PTN (ROSCHEL/SAULO)
+rs_crude_svy <-
+  survey::svyglm(
+    formula = as.factor(INCAPAZ_CLASSE) ~ PTN_STATUS_ROSCHEL,
+    design = NHANES,
+    family = binomial(link = "logit")
+  )
+
+# Summary
+summary(rs_crude_svy)
+cbind(odds = exp(rs_crude_svy$coefficients), exp(confint(rs_crude_svy)))
+sjPlot::tab_model(rs_crude_svy)
+
+## Adjusted logistic regression -  Consumo de PTN (ROSCHEL/SAULO)
+rs_adjusted_svy <-
+  survey::svyglm(
+    formula = as.factor(INCAPAZ_CLASSE) ~ as.factor(PTN_STATUS_ROSCHEL) + RIAGENDR + AGE + RIDRETH1 + PA_CLASS + ENERGY_PT_MODEL + DIQ010 + BPQ020 + MCQ160B + MCQ160E,
+    design = NHANES,
+    family = binomial(link = "logit")
+  )
+
+# Summary
+summary(rs_adjusted_svy)
+cbind(odds = exp(rs_adjusted_svy$coefficients), exp(confint(rs_adjusted_svy)))
+sjPlot::tab_model(rs_adjusted_svy)
