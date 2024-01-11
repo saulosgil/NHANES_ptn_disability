@@ -1,3 +1,17 @@
+# Load survey and dplyr packages
+#+ message = FALSE, warning=FALSE
+library(tidyverse)
+library(survey)
+library(sjPlot)
+#'
+options(survey.lonely.psu='adjust')
+
+# Display Version Information
+cat("R package versions:\n")
+for (p in c("base", "survey","dplyr")) {
+  cat(p, ": ", as.character(packageVersion(p)), "\n")
+}
+
 # Lendo a base --------------------------------------------------------------------------------
 df <- read_rds(file = "df.rds")
 glimpse(df)
